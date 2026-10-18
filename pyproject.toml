@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opsai-cli"
+version = "0.9.0"
+description = "Read-only system diagnostics with optional AI analysis"
+requires-python = ">=3.10"
+dependencies = ["typer>=0.12", "rich>=13", "psutil>=5.9", "openai>=1.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build>=1.2", "commitizen>=3.20,<5", "tomli>=2; python_version < '3.11'"]
+
+[project.scripts]
+opsai = "opsai.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version_provider = "pep621"
+tag_format = "v$version"
+update_changelog_on_bump = true
+major_version_zero = true
+version_files = ["src/opsai/__init__.py"]

@@ -1,0 +1,1 @@
+"""CI reporting adapters."""

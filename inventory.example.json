@@ -1,0 +1,16 @@
+{
+  "servers": [
+    {
+      "name": "web-01",
+      "host": "192.0.2.10",
+      "user": "ops",
+      "port": 22,
+      "identity_file": "~/.ssh/id_ed25519"
+    },
+    {
+      "name": "app-01",
+      "host": "192.0.2.11",
+      "user": "ops"
+    }
+  ]
+}

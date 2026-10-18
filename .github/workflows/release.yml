@@ -1,0 +1,63 @@
+name: Tagged release
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+permissions:
+  contents: write
+jobs:
+  debian-packages:
+    name: Build Debian package / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Build wheel and Debian package
+        run: |
+          python -m pip install build packaging
+          python -m build --wheel
+          scripts/build_deb.sh dist/*.whl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: opsai-deb-py${{ matrix.python-version }}
+          path: dist/*.deb
+          if-no-files-found: error
+
+  release:
+    needs: [debian-packages]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+      - name: Check tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python scripts/check_release_version.py "$RELEASE_TAG"
+      - name: Test
+        run: python -m pytest -q
+      - name: Build
+        run: python -m build
+      - name: Validate distributions
+        run: python -m pip install twine && python -m twine check dist/*
+      - name: Download Debian packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: opsai-deb-*
+          path: dist
+          merge-multiple: true
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --generate-notes --verify-tag

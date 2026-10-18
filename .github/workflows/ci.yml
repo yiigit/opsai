@@ -1,0 +1,103 @@
+name: OpsAI CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    name: Tests / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+      - name: Run unit tests
+        run: python -m pytest -q
+  audit:
+    name: Local security audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e '.[dev]'
+      - name: Collect read-only Linux and Docker audit
+        id: collect
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          set +e
+          opsai security all --json --fail-on none > artifacts/security.json
+          result=$?
+          echo "collector_exit=$result" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Publish annotations, summary, and enforce high-severity gate
+        if: always()
+        shell: bash
+        run: |
+          if [ "${{ steps.collect.outputs.collector_exit }}" != '0' ]; then
+            echo '::error::Security collection failed before report generation'
+            exit 2
+          fi
+          opsai github-report --report artifacts/security.json --fail-on high
+      - name: Upload audit JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: opsai-security-report
+          path: artifacts/security.json
+          if-no-files-found: warn
+          retention-days: 14
+  package:
+    name: Build distribution
+    needs: [test, audit]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install build
+      - run: python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: opsai-dist
+          path: dist/*
+          retention-days: 14
+  debian-package:
+    name: Build Debian package / Python ${{ matrix.python-version }}
+    needs: [test]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Build wheel and Debian package
+        run: |
+          python -m pip install build packaging
+          python -m build --wheel
+          scripts/build_deb.sh dist/*.whl
+      - name: Validate Debian package
+        run: dpkg-deb --info dist/opsai-cli_*.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: opsai-deb-py${{ matrix.python-version }}
+          path: dist/*.deb
+          retention-days: 14

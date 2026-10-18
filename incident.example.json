@@ -1,0 +1,8 @@
+{
+  "source": "nginx",
+  "logs": [
+    "2026-10-12 nginx failed to start",
+    "nginx: [error] upstream connection refused",
+    "Laravel exception: SQLSTATE connection timeout"
+  ]
+}
