@@ -22,6 +22,7 @@ OpenAI.
 - [Incident investigation](#incident-investigation)
 - [GitHub Actions](#github-actions)
 - [Architecture and development](#architecture-and-development)
+- [Contributing](#contributing)
 - [Semantic versioning and releases](#semantic-versioning-and-releases)
 
 ## Install
@@ -381,6 +382,10 @@ opsai --help
 Tests mock subprocess, OpenAI, and filesystem boundaries; they do not require
 root, Docker, remote hosts, production logs, or a live API key.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, tests, safety
+expectations, and pull request guidance.
 
 ## Semantic versioning and releases
 
