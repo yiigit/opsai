@@ -342,7 +342,9 @@ an action.
 
 The CI workflow tests supported Python versions, runs local audits, publishes
 annotations and a job summary, builds Python distributions and Debian packages,
-and uploads artifacts. It does not need OpenAI credentials or SSH secrets.
+and uploads artifacts. A separate weekly security workflow scans source with
+Bandit and checks installed dependencies with `pip-audit`. These workflows do
+not need OpenAI credentials or SSH secrets.
 
 Run locally:
 

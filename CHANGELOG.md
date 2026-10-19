@@ -2,6 +2,13 @@
 
 All notable changes to OpsAI CLI are documented here. Versioning follows Semantic Versioning and Conventional Commits.
 
+## Unreleased
+
+### Added
+
+- Add a dedicated GitHub Actions workflow for Bandit source scanning and
+  `pip-audit` dependency checks.
+
 ## v0.9.0 (2026-10-18)
 
 First public release of OpsAI CLI.
