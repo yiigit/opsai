@@ -6,6 +6,8 @@ All notable changes to OpsAI CLI are documented here. Versioning follows Semanti
 
 ### Added
 
+- Add detailed `opsai system` Linux host and network diagnostics, with
+  explicit-target TCP probes and consent-gated AI troubleshooting.
 - Add a dedicated GitHub Actions workflow for Bandit source scanning and
   `pip-audit` dependency checks.
 

@@ -4,6 +4,7 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Optional
 
+import psutil
 import typer
 from rich.console import Console, Theme
 from rich.table import Table
@@ -11,6 +12,8 @@ from rich.table import Table
 from opsai.collectors import docker_status, health
 
 app = typer.Typer(help='OpsAI: read-only DevOps diagnostics', no_args_is_help=True)
+system_app = typer.Typer(help='Advanced Linux and network diagnostics', no_args_is_help=True)
+app.add_typer(system_app, name='system')
 
 
 class OutputTheme(str, Enum):
@@ -74,6 +77,162 @@ def main(
     """OpsAI: read-only DevOps diagnostics."""
     global console
     console = Console(theme=THEMES[theme])
+
+
+def _emit_system_result(title: str, payload: dict, json_output: bool) -> None:
+    if json_output:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+    console.print(f'[accent]{title}[/accent]')
+    console.print_json(data=payload)
+
+
+def _run_system_diagnostic(title: str, collector, json_output: bool) -> None:
+    try:
+        payload = collector()
+    except (OSError, RuntimeError, ValueError, psutil.Error) as exc:
+        typer.echo(f'{title} failed: {exc}', err=True)
+        raise typer.Exit(code=1) from exc
+    _emit_system_result(title, payload, json_output)
+
+
+@system_app.command('health')
+def system_health_command(
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Collect a comprehensive, read-only Linux system health assessment."""
+    from opsai.infrastructure.system_diagnostics import system_health
+    _run_system_diagnostic('System health', system_health, json_output)
+
+
+@system_app.command('cpu')
+def system_cpu_command(
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Show CPU utilization, per-core load, frequency, and load averages."""
+    from opsai.infrastructure.system_diagnostics import cpu_diagnostics
+    _run_system_diagnostic('CPU diagnostics', cpu_diagnostics, json_output)
+
+
+@system_app.command('memory')
+def system_memory_command(
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Show RAM, swap usage, and Linux memory pressure data."""
+    from opsai.infrastructure.system_diagnostics import memory_diagnostics
+    _run_system_diagnostic('Memory diagnostics', memory_diagnostics, json_output)
+
+
+@system_app.command('disk')
+def system_disk_command(
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Show filesystem capacity and cumulative disk I/O counters."""
+    from opsai.infrastructure.system_diagnostics import disk_diagnostics
+    _run_system_diagnostic('Disk diagnostics', disk_diagnostics, json_output)
+
+
+@system_app.command('processes')
+def system_processes_command(
+    limit: int = typer.Option(10, '--limit', min=1, max=100, help='Number of top processes to show.'),
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """List resource-intensive processes without command-line arguments."""
+    from opsai.infrastructure.system_diagnostics import process_diagnostics
+    _run_system_diagnostic(
+        'Process diagnostics',
+        lambda: process_diagnostics(limit),
+        json_output,
+    )
+
+
+@system_app.command('services')
+def system_services_command(
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """List failed systemd services and units."""
+    from opsai.infrastructure.system_diagnostics import service_diagnostics
+    _run_system_diagnostic('Service diagnostics', service_diagnostics, json_output)
+
+
+@system_app.command('boot')
+def system_boot_command(
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Show systemd boot duration and slow-starting units."""
+    from opsai.infrastructure.system_diagnostics import boot_diagnostics
+    _run_system_diagnostic('Boot diagnostics', boot_diagnostics, json_output)
+
+
+@system_app.command('journal')
+def system_journal_command(
+    lines: int = typer.Option(50, '--lines', min=1, max=100),
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Summarize recent error-level system journal entries."""
+    from opsai.infrastructure.system_diagnostics import journal_diagnostics
+    _run_system_diagnostic(
+        'Journal diagnostics',
+        lambda: journal_diagnostics(lines),
+        json_output,
+    )
+
+
+@system_app.command('updates')
+def system_updates_command(
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Check cached package metadata for available security updates without refreshing it."""
+    from opsai.infrastructure.system_diagnostics import update_diagnostics
+    _run_system_diagnostic('Security update check', update_diagnostics, json_output)
+
+
+@system_app.command('network')
+def system_network_command(
+    host: Optional[str] = typer.Option(None, '--host', help='Explicit host for a TCP connectivity probe.'),
+    port: Optional[int] = typer.Option(
+        None,
+        '--port',
+        min=1,
+        max=65535,
+        help='TCP port for the explicit connectivity probe; requires --host.',
+    ),
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Inspect local interfaces, routes and DNS; optionally probe an explicit host and port."""
+    from opsai.infrastructure.system_diagnostics import network_diagnostics
+    _run_system_diagnostic(
+        'Network diagnostics',
+        lambda: network_diagnostics(host, port),
+        json_output,
+    )
+
+
+@system_app.command('troubleshoot')
+def system_troubleshoot_command(
+    ai: bool = typer.Option(False, '--ai', help='Send collected diagnostics to OpenAI for suggestions.'),
+    yes: bool = typer.Option(False, '--yes', help='Confirm diagnostics may be sent to OpenAI.'),
+    json_output: bool = typer.Option(False, '--json', help='Emit machine-readable JSON.'),
+):
+    """Collect system evidence and optionally request cautious AI troubleshooting suggestions."""
+    from opsai.infrastructure.system_diagnostics import system_health
+
+    try:
+        payload = system_health()
+        if ai:
+            if not yes:
+                typer.echo(
+                    'System diagnostics, including process names, network addresses, '
+                    'and redacted journal entries, will be sent to OpenAI.'
+                )
+                if not typer.confirm('Continue?'):
+                    return
+            from opsai.infrastructure.openai import analyze
+            payload = {**payload, 'ai_analysis': analyze(payload)}
+        _emit_system_result('System troubleshooting', payload, json_output)
+    except (OSError, RuntimeError, ValueError, psutil.Error) as exc:
+        typer.echo(f'System troubleshooting failed: {exc}', err=True)
+        raise typer.Exit(code=1) from exc
 
 
 @app.command()
