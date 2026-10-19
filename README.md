@@ -22,6 +22,7 @@ OpenAI.
 - [Incident investigation](#incident-investigation)
 - [GitHub Actions](#github-actions)
 - [Architecture and development](#architecture-and-development)
+- [Contributing](#contributing)
 - [Semantic versioning and releases](#semantic-versioning-and-releases)
 
 ## Install
@@ -341,7 +342,9 @@ an action.
 
 The CI workflow tests supported Python versions, runs local audits, publishes
 annotations and a job summary, builds Python distributions and Debian packages,
-and uploads artifacts. It does not need OpenAI credentials or SSH secrets.
+and uploads artifacts. A separate weekly security workflow scans source with
+Bandit and checks installed dependencies with `pip-audit`. These workflows do
+not need OpenAI credentials or SSH secrets.
 
 Run locally:
 
@@ -381,6 +384,10 @@ opsai --help
 Tests mock subprocess, OpenAI, and filesystem boundaries; they do not require
 root, Docker, remote hosts, production logs, or a live API key.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, tests, safety
+expectations, and pull request guidance.
 
 ## Semantic versioning and releases
 
