@@ -9,7 +9,7 @@ JSON for automation. Collection and audits do not change system configuration.
 AI-assisted analysis is optional and requires consent before evidence is sent to
 OpenAI.
 
-**Current release: v0.9.0**, the first public release.
+**Current release: v1.0.0.** The first public release was v0.9.0.
 
 ## Contents
 
@@ -455,4 +455,4 @@ git push origin main --follow-tags
 
 ## AI coding agent instructions
 
-See [`AGENT.md`](AGENT.md) (also available as [`AGENTS.md`](AGENTS.md) for tools that recognize that convention). Version `0.9.0` is the first public release; earlier internal milestones are not public releases.
+See [`AGENT.md`](AGENT.md) (also available as [`AGENTS.md`](AGENTS.md) for tools that recognize that convention). Version `0.9.0` was the first public release; earlier internal milestones were not public releases.

@@ -4,6 +4,15 @@ All notable changes to OpsAI CLI are documented here. Versioning follows Semanti
 
 ## v1.0.0 (2026-10-21)
 
+### Added
+
+- Focus OpsAI CLI on advanced Linux and network diagnostics with commands for
+  system health, CPU, memory, disk, processes, failed services, boot time,
+  journal errors, cached security updates, network configuration, and
+  troubleshooting.
+- Add explicit-host TCP connectivity probes and consent-gated AI
+  troubleshooting while retaining read-only collection by default.
+
 ## v0.10.0 (2026-10-21)
 
 ### Feat
