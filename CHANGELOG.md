@@ -2,6 +2,8 @@
 
 All notable changes to OpsAI CLI are documented here. Versioning follows Semantic Versioning and Conventional Commits.
 
+## v1.0.0 (2026-10-21)
+
 ## v0.10.0 (2026-10-21)
 
 ### Feat
