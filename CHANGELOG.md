@@ -2,14 +2,11 @@
 
 All notable changes to OpsAI CLI are documented here. Versioning follows Semantic Versioning and Conventional Commits.
 
-## Unreleased
+## v0.10.0 (2026-10-21)
 
-### Added
+### Feat
 
-- Add detailed `opsai system` Linux host and network diagnostics, with
-  explicit-target TCP probes and consent-gated AI troubleshooting.
-- Add a dedicated GitHub Actions workflow for Bandit source scanning and
-  `pip-audit` dependency checks.
+- **system**: add advanced Linux and network diagnostics
 
 ## v0.9.0 (2026-10-18)
 
