@@ -1,14 +1,15 @@
-# OpsAI CLI
+# OpsAI CLI — Advanced Linux & Network Diagnostics
 
-Read-only local DevOps diagnostics for Linux, Nginx, Laravel, SSH, and Docker,
-with optional OpenAI log triage and an explicitly approved local incident action.
+Advanced, read-only Linux and network diagnostics, alongside Nginx/Laravel log
+analysis, SSH monitoring, Docker and application-security audits, and optional
+AI-assisted troubleshooting.
 
 OpsAI is designed for operators who need a quick terminal view or deterministic
 JSON for automation. Collection and audits do not change system configuration.
 AI-assisted analysis is optional and requires consent before evidence is sent to
 OpenAI.
 
-**Current release: v0.9.0**, the first public release.
+**Current release: v1.0.0.** The first public release was v0.9.0.
 
 ## Contents
 
@@ -22,6 +23,7 @@ OpenAI.
 - [Incident investigation](#incident-investigation)
 - [GitHub Actions](#github-actions)
 - [Architecture and development](#architecture-and-development)
+- [Contributing](#contributing)
 - [Semantic versioning and releases](#semantic-versioning-and-releases)
 
 ## Install
@@ -103,10 +105,49 @@ and has no theme styling.
 
 ## Command guide
 
+### Linux and network diagnostics
+
+`opsai system` groups detailed host diagnostics under a single command:
+
+| Command | Function |
+| --- | --- |
+| `opsai system health` | Complete system health assessment with partial-result errors |
+| `opsai system cpu` | CPU utilization, per-core sampling, frequency, and load averages |
+| `opsai system memory` | RAM, swap, and Linux memory-pressure data |
+| `opsai system disk` | Filesystem capacity and cumulative disk I/O |
+| `opsai system processes` | Top resource-intensive processes (no command-line arguments collected) |
+| `opsai system services` | Failed systemd units |
+| `opsai system boot` | Boot duration and slow-starting systemd units |
+| `opsai system journal` | Recent error-level journal entries with best-effort redaction |
+| `opsai system updates` | Cached Debian/Ubuntu or DNF security-update checks |
+| `opsai system network` | Interfaces, addresses, default routes, and DNS configuration |
+| `opsai system troubleshoot` | Collect diagnostics and optionally request AI suggestions |
+
+Use `--json` with any system command for machine-readable output. Update checks
+do not refresh repository metadata; results may reflect stale local caches.
+Systemd commands require systemd and suitable journal permissions. Network
+inspection is local by default. An active TCP probe only runs when both an
+explicit `--host` and `--port` are provided:
+
+```bash
+opsai system health --json
+opsai system network --host example.com --port 443
+opsai system troubleshoot --ai
+```
+
+`--ai` requires consent before sending diagnostics to OpenAI unless `--yes` is
+provided. The payload can include process names, local network addresses, and
+redacted journal messages. AI suggestions are advisory; OpsAI does not execute
+them.
+
+The earlier `opsai status` command remains available for a quick CPU, memory,
+and root-filesystem summary.
+
 ```bash
 opsai --help                         # list commands and options
 opsai --version                      # print the installed version
 opsai --theme macos status           # select a theme globally
+opsai system health --json           # detailed Linux system report
 opsai status                         # CPU, memory, and disk summary
 opsai status --json                  # machine-readable local metrics
 opsai docker                         # list running containers
@@ -341,7 +382,9 @@ an action.
 
 The CI workflow tests supported Python versions, runs local audits, publishes
 annotations and a job summary, builds Python distributions and Debian packages,
-and uploads artifacts. It does not need OpenAI credentials or SSH secrets.
+and uploads artifacts. A separate weekly security workflow scans source with
+Bandit and checks installed dependencies with `pip-audit`. These workflows do
+not need OpenAI credentials or SSH secrets.
 
 Run locally:
 
@@ -381,6 +424,10 @@ opsai --help
 Tests mock subprocess, OpenAI, and filesystem boundaries; they do not require
 root, Docker, remote hosts, production logs, or a live API key.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, tests, safety
+expectations, and pull request guidance.
 
 ## Semantic versioning and releases
 
@@ -390,6 +437,7 @@ Commitizen uses Conventional Commits and writes `CHANGELOG.md`.
 ```bash
 pip install -e '.[dev]'
 git init                         # only for a new checkout; omit in an existing repository
+
 git add -i                        # review and select project files; exclude local evidence and secrets
 git commit -m 'chore: initialize opsai 0.9.0'
 git tag v0.9.0                  # first public release
@@ -407,4 +455,4 @@ git push origin main --follow-tags
 
 ## AI coding agent instructions
 
-See [`AGENT.md`](AGENT.md) (also available as [`AGENTS.md`](AGENTS.md) for tools that recognize that convention). Version `0.9.0` is the first public release; earlier internal milestones are not public releases.
+See [`AGENT.md`](AGENT.md) (also available as [`AGENTS.md`](AGENTS.md) for tools that recognize that convention). Version `0.9.0` was the first public release; earlier internal milestones were not public releases.

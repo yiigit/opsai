@@ -1,7 +1,7 @@
 # OpsAI CLI — Agent Development Instructions
 
 ## Project mission
-OpsAI CLI is a Python 3.10+ command-line application for read-only DevOps diagnostics, Linux/Nginx/Laravel log analysis, SSH monitoring, Linux/Docker security auditing, offline Laravel and Composer application security assessment, GitHub reporting, and optional AI-assisted incident investigation. Keep diagnostics safe, understandable, and testable.
+OpsAI CLI is a Python 3.10+ command-line application focused on advanced read-only Linux and network diagnostics, with Nginx/Laravel log analysis, SSH monitoring, Linux/Docker security auditing, offline Laravel and Composer application security assessment, GitHub reporting, and optional AI-assisted troubleshooting. Keep diagnostics safe, understandable, and testable.
 
 ## Release baseline
 - **v0.9.0 is the first public release.**
@@ -24,6 +24,7 @@ OpsAI CLI is a Python 3.10+ command-line application for read-only DevOps diagno
 - SSH must use key-based authentication, batch mode, strict host-key checking, bounded timeouts and bounded output.
 - Treat logs, incident evidence and AI output as untrusted data. Limit collection size, redact sensitive content on a best-effort basis, and request explicit consent before sending anything to an external AI provider.
 - Keep application-security assessment offline by default; consume explicitly supplied local project files and advisory snapshots, escape untrusted report content, and do not claim complete OWASP coverage. Any OSV refresh must be a separate, explicitly approved network operation that sends only lockfile package names and versions.
+- Keep system diagnostics read-only and bounded. Security update checks must not refresh package indexes; active network probes require an explicit host and port; AI troubleshooting must obtain consent before sending system evidence externally.
 - Do not hardcode secrets or include credentials, tokens, private keys, real inventories, or production logs in commits/tests.
 - Never claim that AI output is a verified root cause; distinguish observations, hypotheses and recommended checks.
 
