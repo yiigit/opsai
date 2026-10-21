@@ -437,6 +437,7 @@ Commitizen uses Conventional Commits and writes `CHANGELOG.md`.
 ```bash
 pip install -e '.[dev]'
 git init                         # only for a new checkout; omit in an existing repository
+
 git add -i                        # review and select project files; exclude local evidence and secrets
 git commit -m 'chore: initialize opsai 0.9.0'
 git tag v0.9.0                  # first public release
