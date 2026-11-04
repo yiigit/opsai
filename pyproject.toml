@@ -7,7 +7,7 @@ name = "opsai-cli"
 version = "1.0.0"
 description = "Read-only system diagnostics with optional AI analysis"
 requires-python = ">=3.10"
-dependencies = ["typer>=0.12", "rich>=13", "psutil>=5.9", "openai>=1.0"]
+dependencies = ["typer>=0.12", "rich>=13", "psutil>=5.9", "openai>=3.42.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "build>=1.2", "commitizen>=3.20,<5", "tomli>=2; python_version < '3.11'"]
